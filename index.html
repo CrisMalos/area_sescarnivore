@@ -83,13 +83,25 @@
     })();
 
     // 5) Download GeoJSON
-    document.getElementById('btn-export').onclick = () => {
-      const data = drawnItems.toGeoJSON();
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = Object.assign(document.createElement('a'), { href: url, download: 'drawn-geometries.geojson' });
-      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-    };
+document.getElementById('btn-export').onclick = () => {
+  const data = drawnItems.toGeoJSON();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  // Ask the user for a filename
+  let filename = prompt("Enter file name (without extension):", "my-geometries");
+  if (!filename) return; // user cancelled
+  if (!filename.endsWith('.geojson')) filename += '.geojson';
+
+  const a = Object.assign(document.createElement('a'), {
+    href: url,
+    download: filename
+  });
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
 
     // 6) Import GeoJSON
     document.getElementById('file-input').onchange = (e) => {
