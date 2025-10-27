@@ -14,6 +14,43 @@
 </head>
 <body>
   <div id="map"></div>
+  <!-- Add this under <div id="map"></div> -->
+<button id="btn-export">Download GeoJSON</button>
+<input id="file-input" type="file" accept=".geojson,.json" style="margin-left:8px;">
+<button id="btn-clear">Clear</button>
+
+<script>
+  // ... your map + drawnItems + drawControl code ...
+
+  // EXPORT as GeoJSON file
+  document.getElementById('btn-export').onclick = () => {
+    const data = drawnItems.toGeoJSON();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = Object.assign(document.createElement('a'), {
+      href: url, download: 'drawn-geometries.geojson'
+    });
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  };
+
+  // IMPORT a GeoJSON file (optional)
+  document.getElementById('file-input').onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const geojson = JSON.parse(reader.result);
+        L.geoJSON(geojson).eachLayer(l => drawnItems.addLayer(l));
+      } catch (err) { alert('Invalid GeoJSON'); }
+    };
+    reader.readAsText(file);
+  };
+
+  // CLEAR
+  document.getElementById('btn-clear').onclick = () => drawnItems.clearLayers();
+</script>
+
   <script>
     const map = L.map('map').setView([45, 25], 6);
 
